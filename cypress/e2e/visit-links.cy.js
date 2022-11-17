@@ -1,3 +1,4 @@
+// @ts-check
 // enables intelligent code completion for Cypress commands
 // https://on.cypress.io/intelligent-code-completion
 /// <reference types="cypress" />
@@ -9,20 +10,17 @@ it('checks the title of every page', () => {
   const links = []
   cy.get('#links li a')
     .each(($li) => {
-      const href = $li[0].getAttribute('href')
-      links.push(href)
+      links.push($li[0])
       cy.log(`Got a link!`)
     })
     .then(() => {
       cy.log(`Got ${links.length} links`)
 
       for (const link of links) {
-        cy.get('#links li a[href="' + link + '"]')
-          .then(($link) => {
-            cy.wrap($link).click()
-            cy.get('.title').should('have.text', $link.text())
-          })
-          .click()
+        const href = link.getAttribute('href')
+        const text = link.innerText
+        cy.contains('#links li a[href="' + href + '"]', text).click()
+        cy.get('.title').should('have.text', text)
         cy.go('back')
       }
     })
