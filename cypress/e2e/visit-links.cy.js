@@ -1,24 +1,29 @@
 // enables intelligent code completion for Cypress commands
 // https://on.cypress.io/intelligent-code-completion
 /// <reference types="cypress" />
+import 'cypress-command-chain'
 
-// this test does nothing, for some reason
-// it prints "Got 0 links"
-// and does not visit any of the pages :(
 it('checks the title of every page', () => {
   cy.visit('public/index.html')
 
   const links = []
-  cy.get('#links li a').each(($li) => {
-    links.push($li[0])
-    cy.log(`Got a link!`)
-  })
+  cy.get('#links li a')
+    .each(($li) => {
+      const href = $li[0].getAttribute('href')
+      links.push(href)
+      cy.log(`Got a link!`)
+    })
+    .then(() => {
+      cy.log(`Got ${links.length} links`)
 
-  cy.log(`Got ${links.length} links`)
-
-  for (const link of links) {
-    cy.wrap(link).click()
-    cy.get('.title').should('have.text', link.innerText)
-    cy.go('back')
-  }
+      for (const link of links) {
+        cy.get('#links li a[href="' + link + '"]')
+          .then(($link) => {
+            cy.wrap($link).click()
+            cy.get('.title').should('have.text', $link.text())
+          })
+          .click()
+        cy.go('back')
+      }
+    })
 })
