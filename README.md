@@ -1,0 +1,1 @@
+# cypress-visit-pages-example
